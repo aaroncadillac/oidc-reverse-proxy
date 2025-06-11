@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon ./server.js"
   },
-  "bin": "./server.js",
+  "bin": {
+    "oidc-rproxy": "./server.js"
+  },
   "repository": "https://github.com/aaroncadillac/oidc-reverse-proxy",
   "author": "aaroncadillac",
   "license": "MPL-2.0",
