@@ -1,0 +1,26 @@
+{
+  "name": "@aaroncadillac/oidc-reverse-proxy",
+  "version": "1.0.0",
+  "description": "A simple reverse proxy to protect paths with OIDC based on fastify",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./server.js"
+  },
+  "bin": "./server.js",
+  "repository": "https://github.com/aaroncadillac/oidc-reverse-proxy",
+  "author": "aaroncadillac",
+  "license": "MPL-2.0",
+  "private": false,
+  "type": "module",
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/http-proxy": "^11.1.2",
+    "@fastify/session": "^11.1.0",
+    "fastify": "^5.3.3",
+    "openid-client": "^6.5.1",
+    "sade": "^1.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
