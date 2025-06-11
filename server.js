@@ -55,7 +55,6 @@ prog
       fastify.get(callbackPath, async (req, reply) => {
         console.info('\x1b[90mAuth flow started\x1b[0m')
         const verifyURL = public_uri + req.url
-        console.info('\n\n Verify URL: ' + verifyURL + '\n\n')
         await verifyNGetToken(verifyURL, config, req)
         console.info('\x1b[90mAuth flow finished\x1b[0m')
         reply.redirect(path)
@@ -87,7 +86,6 @@ prog
           }
         },
       });
-      console.info(`\n\n\x1b[90mProxying ${path} to ${upstream}\x1b[0m\n\n`)
     }
 
     fastify.listen({ host: opts.host, port: opts.port });
