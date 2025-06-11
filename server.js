@@ -35,7 +35,7 @@ prog
     verifyJSON(config);
 
     fastify.register(fastifyCookie);
-    fastify.register(fastifySession, {secret: 'fbf342d5f38d2812c3692152d40fe2cf', cookieName: config.session_cookie_name, cookie: { secure: public_uri.includes('https') }});
+    fastify.register(fastifySession, {secret: 'fbf342d5f38d2812c3692152d40fe2cf', cookieName: config.session_cookie_name, cookie: { secure: 'auto'}});
     
     for (const [path, pathConfig] of Object.entries(config.paths)) {
       const upstream = pathConfig.upstream;
@@ -54,7 +54,9 @@ prog
 
       fastify.get(callbackPath, async (req, reply) => {
         console.info('\x1b[90mAuth flow started\x1b[0m')
-        await verifyNGetToken(public_uri + req.url, config, req)
+        const verifyURL = public_uri + req.url
+        console.info('\n\n Verify URL: ' + verifyURL + '\n\n')
+        await verifyNGetToken(verifyURL, config, req)
         console.info('\x1b[90mAuth flow finished\x1b[0m')
         reply.redirect(path)
       });
@@ -85,6 +87,7 @@ prog
           }
         },
       });
+      console.info(`\n\n\x1b[90mProxying ${path} to ${upstream}\x1b[0m\n\n`)
     }
 
     fastify.listen({ host: opts.host, port: opts.port });
