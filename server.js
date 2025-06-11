@@ -35,7 +35,7 @@ prog
     verifyJSON(config);
 
     fastify.register(fastifyCookie);
-    fastify.register(fastifySession, {secret: 'fbf342d5f38d2812c3692152d40fe2cf', cookieName: config.session_cookie_name, cookie: { secure: false }});
+    fastify.register(fastifySession, {secret: 'fbf342d5f38d2812c3692152d40fe2cf', cookieName: config.session_cookie_name, cookie: { secure: public_uri.includes('https') }});
     
     for (const [path, pathConfig] of Object.entries(config.paths)) {
       const upstream = pathConfig.upstream;
