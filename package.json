@@ -16,6 +16,14 @@
   "publishConfig": {
     "access": "public"
   },
+  "keywords": [
+    "fastify",
+    "oidc",
+    "reverse",
+    "proxy",
+    "auth",
+    "openid"
+  ],
   "type": "module",
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
