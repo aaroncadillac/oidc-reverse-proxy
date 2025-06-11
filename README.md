@@ -68,15 +68,20 @@ The config file is a JSON file that defines how users are authenticated and how 
   "session_cookie_name": "oidc_session",
   "email_domains": ["example.com", "anotherdomain.com"],
   "paths": {
-    "/foo": {
+    "/foo/": {
       "upstream": "http://127.0.0.1:9003"
     },
-    "/bar": {
-      "upstream": "http://localhost:5000"
+    "/bar/": {
+      "upstream": "http://localhost:5000",
+      "healthcheck": "health"
     }
   }
 }
 ```
+
+### 📝 Notes
+
+`paths` keys must end with `/`
 
 ### 🧪 Required Fields
 
@@ -87,6 +92,7 @@ The config file is a JSON file that defines how users are authenticated and how 
 - `token_endpoint`
 - `user_info_endpoint`
 - `paths`
+- `paths.*.upstream`
 
 ### 🔐 Authentication
 

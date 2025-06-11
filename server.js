@@ -42,6 +42,12 @@ prog
       const callbackPath = `${path}oidc/callback`;
       const redirectURI = `${public_uri}${callbackPath}`;
 
+      if (pathConfig.healthcheck) {
+        fastify.get(path + pathConfig.healthcheck, async (req, reply) => {
+          const response = await fetch(pathConfig.upstream)
+          reply.code(response.status).send({ status: response.ok });
+        });
+      }
       fastify.get(path.slice(0, -1), (req, reply) => {
         reply.redirect(path);
       });

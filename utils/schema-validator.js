@@ -16,7 +16,8 @@ const schema = {
       additionalProperties: {
         type: "object",
         properties: {
-          upstream: { type: "string" }
+          upstream: { type: "string" },
+          healthcheck: { type: "string" }
         },
         required: ["upstream"],
         additionalProperties: false
