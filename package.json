@@ -1,6 +1,6 @@
 {
   "name": "@aaroncadillac/oidc-reverse-proxy",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A simple reverse proxy to protect paths with OIDC based on fastify",
   "main": "server.js",
   "scripts": {
