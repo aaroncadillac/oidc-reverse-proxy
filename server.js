@@ -70,7 +70,7 @@ prog
           prefix: path !== '/' ? path : undefined,
           rewritePrefix: '',
           http2: false,
-          websocket: false,
+          websocket: true,
           replyOptions: {
             rewriteHeaders: (headers) => {
               if (headers.location && headers.location.startsWith('.')) {
