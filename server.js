@@ -30,63 +30,73 @@ prog
   .example('run --host 0.0.0.0 --port 3000 --config custom.json')
   .action((public_uri, opts) => {
     const configPath = opts.config.replace('~', homedir);
-    const config = readConfigFile(configPath);
+    const fullConfig = readConfigFile(configPath);
 
-    verifyJSON(config);
+    verifyJSON(fullConfig);
 
     fastify.register(fastifyCookie);
-    fastify.register(fastifySession, {secret: 'fbf342d5f38d2812c3692152d40fe2cf', cookieName: config.session_cookie_name, cookie: { secure: 'auto'}});
     
-    for (const [path, pathConfig] of Object.entries(config.paths)) {
-      const upstream = pathConfig.upstream;
-      const callbackPath = `${path}oidc/callback`;
-      const redirectURI = `${public_uri}${callbackPath}`;
+    for (const config of fullConfig) {
+      
+      fastify.register(fastifySession, {secret: config.session_cookie_secret, cookieName: config.session_cookie_name, cookie: { secure: 'auto', sameSite: 'strict'}});
 
-      if (pathConfig.healthcheck) {
-        fastify.get(path + pathConfig.healthcheck, async (req, reply) => {
-          const response = await fetch(pathConfig.upstream)
-          reply.code(response.status).send({ status: response.ok });
+      for (const [path, pathConfig] of Object.entries(config.paths)) {
+        const upstream = pathConfig.upstream;
+        const callbackPath = `${path}oidc/callback`;
+        const redirectURI = `${public_uri}${callbackPath}`;
+
+        if (pathConfig.healthcheck) {
+          fastify.get(path + pathConfig.healthcheck, async (req, reply) => {
+            const response = await fetch(pathConfig.upstream)
+            reply.code(response.status).send({ status: response.ok });
+          });
+        }
+        if (path !== '/') {
+          fastify.get(path.slice(0, -1), (req, reply) => {
+            reply.redirect(path);
+          });
+        }
+
+        fastify.get(callbackPath, async (req, reply) => {
+          console.info('\x1b[90mAuth flow started\x1b[0m')
+          const verifyURL = public_uri + req.url
+          await verifyNGetToken(verifyURL, config, req)
+          console.info('\x1b[90mAuth flow finished\x1b[0m')
+          reply.redirect(path)
+        });
+
+        fastify.register(fastifyHttpProxy, {
+          upstream,
+          prefix: path !== '/' ? path : undefined,
+          rewritePrefix: '',
+          http2: false,
+          websocket: false,
+          replyOptions: {
+            rewriteHeaders: (headers) => {
+              if (headers.location && headers.location.startsWith('.')) {
+                headers.location = headers.location.replace(`.${path}`, '');
+              }
+              return headers;
+            },
+            rewriteRequestHeaders: (originalReq, headers) => ({
+              ...headers,
+              'authorization': originalReq.session.get('access_token')
+            }),
+          },
+          preValidation: async (request, reply) => {
+            const token = request.session.get('access_token');
+            let userInfo = false
+            if (token) {
+              userInfo = await getUserInfo(token, config, request);
+            }
+            if (!token || !userInfo) {
+                const redirectTo = await initAuthFlow(redirectURI, config, request)
+                reply.redirect(redirectTo);
+            }
+          },
         });
       }
-      fastify.get(path.slice(0, -1), (req, reply) => {
-        reply.redirect(path);
-      });
-
-      fastify.get(callbackPath, async (req, reply) => {
-        console.info('\x1b[90mAuth flow started\x1b[0m')
-        const verifyURL = public_uri + req.url
-        await verifyNGetToken(verifyURL, config, req)
-        console.info('\x1b[90mAuth flow finished\x1b[0m')
-        reply.redirect(path)
-      });
-
-      fastify.register(fastifyHttpProxy, {
-        upstream,
-        prefix: path,
-        rewritePrefix: '',
-        http2: false,
-        websocket: true,
-        replyOptions: {
-          rewriteHeaders: (headers) => {
-            if (headers.location && headers.location.startsWith('.')) {
-              headers.location = headers.location.replace(`.${path}`, '');
-            }
-            return headers;
-          }
-        },
-        preValidation: async (request, reply) => {
-          const token = request.session.get('access_token');
-          let userInfo = false
-          if (token) {
-            userInfo = await getUserInfo(token, config, request);
-          }
-          if (!token || !userInfo) {
-              const redirectTo = await initAuthFlow(redirectURI, config, request)
-              reply.redirect(redirectTo);
-          }
-        },
-      });
-    }
+    } 
 
     fastify.listen({ host: opts.host, port: opts.port });
   });
