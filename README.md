@@ -11,13 +11,13 @@ npm install -g @aaroncadillac/oidc-reverse-proxy
 ## Basic usage
 
 ```bash
-oidc-rproxy run
+oidc-rproxy run http://localhost
 ```
 
 This command starts the OIDC-authenticated reverse-proxy server. You can override the default host, port and config file path:
 
 ```bash
-oidc-rproxy run --host 0.0.0.0 --port 8080 --config ~/custom-config.json
+oidc-rproxy run http://localhost:8080 --host 0.0.0.0 --port 8080 --config ~/custom-config.json
 ```
 
 > For every successful request the proxy injects an `Authorization: Bearer <access_token>` header containing the user’s OIDC access-token. Your upstream services can therefore handle sessions without additional middleware.
@@ -39,8 +39,8 @@ Starts the reverse-proxy server.
 #### Examples
 
 ```bash
-oidc-rproxy run
-oidc-rproxy run --host 127.0.0.1 --port 9000 --config ~/config.json
+oidc-rproxy run http://localhost:8080
+oidc-rproxy run https://example.com --host 127.0.0.1 --port 9000 --config ~/config.json
 ```
 
 ## Configuration file (`oidc-rproxy.json`)
@@ -57,7 +57,7 @@ Each object in the array maps one or more path prefixes to a single OIDC provide
 
 ### Example configuration
 
-```jsonc
+```json
 [
   {
     "issuer": "https://auth.example.com",
@@ -69,6 +69,7 @@ Each object in the array maps one or more path prefixes to a single OIDC provide
     "paths": {
       "/api/": { "upstream": "http://127.0.0.1:4000" },
       "/docs/": { "upstream": "http://127.0.0.1:4001", "healthcheck": "health" }
+      "/docs/": { "upstream": "http://127.0.0.1:4001", "healthcheckRootPath": "/health" } /*This path is accessible without base path*/ 
     }
   },
   {
