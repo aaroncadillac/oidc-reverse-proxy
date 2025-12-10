@@ -1,5 +1,5 @@
-import Ajv from "ajv"
-const ajv = new Ajv()
+import Ajv from "ajv";
+const ajv = new Ajv();
 
 const schema = {
   type: "array",
@@ -20,29 +20,36 @@ const schema = {
           type: "object",
           properties: {
             upstream: { type: "string" },
-            healthcheck: { type: "string" }
+            healthcheck: { type: "string" },
+            healthcheckRootPath: { type: "string" },
           },
           required: ["upstream"],
-          additionalProperties: false
-        }
-      }
+          additionalProperties: false,
+        },
+      },
     },
-    required: ["issuer", "client_id", "client_secret", "paths", "session_cookie_secret"],
-    additionalProperties: false
+    required: [
+      "issuer",
+      "client_id",
+      "client_secret",
+      "paths",
+      "session_cookie_secret",
+    ],
+    additionalProperties: false,
   },
-  minItems: 1
-}
+  minItems: 1,
+};
 
 const verifyJSON = (json) => {
   try {
-    const valid = ajv.validate(schema, json)
+    const valid = ajv.validate(schema, json);
     if (!valid) {
-      throw ajv.errors?.[0]?.message 
+      throw ajv.errors?.[0]?.message;
     }
   } catch (error) {
-    console.error('Config file is not valid:', error)
-    process.exit(1)
+    console.error("Config file is not valid:", error);
+    process.exit(1);
   }
-}
+};
 
-export { verifyJSON }
+export { verifyJSON };
